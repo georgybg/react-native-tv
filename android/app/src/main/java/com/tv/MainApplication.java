@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
+import com.appgoalz.rnjwplayer.RNJWPlayerPackage;
 import com.brentvatne.react.ReactVideoPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -11,6 +12,7 @@ import com.facebook.soloader.SoLoader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import com.brentvatne.react.ReactVideoPackage;
+import net.gamesofton.rnjwplayer.RNJWPlayerPackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -29,6 +31,8 @@ public class MainApplication extends Application implements ReactApplication {
           // packages.add(new MyReactNativePackage());
 
           packages.add(new ReactVideoPackage());
+          packages.add(new RNJWPlayerPackage());
+
           return packages;
         }
 

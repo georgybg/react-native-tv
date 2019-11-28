@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Video from 'react-native-video';
 import MediaControls, { PLAYER_STATES } from 'react-native-media-controls';
+import JWPlayer from 'react-native-jw-media-player';
 
 class App extends Component {
     videoPlayer;
@@ -69,33 +70,39 @@ class App extends Component {
     onSeeking = currentTime => this.setState({ currentTime });
 
     render() {
+
+        const playlistItem = {
+            title: 'Track',
+            mediaId: -1,
+            image: 'http://image.com/image.png',
+            desc: 'My beautiful track',
+            time: 0,
+            file: 'http://file.com/file.mp3',
+            autostart: true,
+            controls: true,
+            repeat: false,
+            displayDescription: true,
+            displayTitle: true
+        };
+
         return (
             <View style={styles.container}>
-                <Video
-                    onEnd={this.onEnd}
-                    onLoad={this.onLoad}
-                    onLoadStart={this.onLoadStart}
-                    onProgress={this.onProgress}
-                    paused={this.state.paused}
-                    ref={videoPlayer => (this.videoPlayer = videoPlayer)}
-                    resizeMode={this.state.screenType}
-                    onFullScreen={this.state.isFullScreen}
-                    source={{ uri: 'http://178.124.183.14:80/hls/HNBMWPATWZ/variant.m3u8' }}
-                    style={styles.mediaPlayer}
-                    volume={10}
-                />
-                <MediaControls
-                    duration={this.state.duration}
-                    isLoading={this.state.isLoading}
-                    mainColor="#333"
-                    onFullScreen={this.onFullScreen}
-                    onPaused={this.onPaused}
-                    onReplay={this.onReplay}
-                    onSeek={this.onSeek}
-                    onSeeking={this.onSeeking}
-                    playerState={this.state.playerState}
-                    progress={this.state.currentTime}
-                    toolbar={this.renderToolbar()}
+                <JWPlayer
+                    ref={p => (this.JWPlayer = p)}
+                    style={styles.player}
+                    playlistItem={playlistItem} // Recommended - pass the playlistItem as a prop into the player
+                    // playlist={[playlistItem]}
+                    onBeforePlay={() => this.onBeforePlay()}
+                    onPlay={() => this.onPlay()}
+                    onPause={() => this.onPause()}
+                    onIdle={() => console.log("onIdle")}
+                    onPlaylistItem={event => this.onPlaylistItem(event)}
+                    onSetupPlayerError={event => this.onPlayerError(event)}
+                    onPlayerError={event => this.onPlayerError(event)}
+                    onBuffer={() => this.onBuffer()}
+                    onTime={event => this.onTime(event)}
+                    onFullScreen={() => this.onFullScreen()}
+                    onFullScreenExit={() => this.onFullScreenExit()}
                 />
             </View>
         );
