@@ -8,6 +8,8 @@ import AppNavigator from './app/navigation/AppNavigator';
 import { fetchChannelsRedux } from "./app/services/channels";
 import { appStore } from './app/redux/Store';
 import { getChannelsError, getChannelsPending } from './app/redux/reducers';
+import { getToken, isGuest } from "./app/services/auth/Identity";
+import { reauthenticate } from "./app/redux/actions";
 
 const mapStateToProps = state => ({
     error: getChannelsError(state),
@@ -16,12 +18,19 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
     fetchChannels: fetchChannelsRedux,
+    //reauthenticate
 }, dispatch);
 
 const App = connect(mapStateToProps, mapDispatchToProps)((props) => {
     StatusBar.setHidden(true);
 
     const [ spinner, setSpinner ] = useState(true);
+
+   /* useEffect(() => {
+        if(!isGuest()) {
+            props.reauthenticate(getToken())
+        }
+    });*/
 
     useEffect(() => {
         let interval = setInterval(() => {

@@ -2,8 +2,9 @@ import React from "react";
 import { TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
 import { withNavigation } from 'react-navigation';
+import { connect } from 'react-redux';
 
-const Right = (props) => {
+const Right = ({ isAuthenticated, navigation }) => {
     return (
         <View style={{ flexDirection: 'row', marginRight: 10 }}>
            {/* <TouchableOpacity style={{paddingHorizontal: 15}}>
@@ -12,7 +13,13 @@ const Right = (props) => {
             <TouchableOpacity style={{paddingHorizontal: 15}}>
                 <Icon name='user' size={25} color={'#000'}
                       onPress={() => {
-                          props.navigation.navigate('Login')
+                          let route = 'Login';
+
+                          if (isAuthenticated) {
+                              route = 'Profile';
+                          }
+
+                          navigation.navigate(route)
                       }}
                 />
             </TouchableOpacity>
@@ -20,4 +27,8 @@ const Right = (props) => {
     );
 };
 
-export default withNavigation(Right);
+const mapStateToProps = (state) => (
+    { isAuthenticated: !!state.authentication.token }
+);
+
+export default connect(mapStateToProps)(withNavigation(Right));

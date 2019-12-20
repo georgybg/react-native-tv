@@ -21,7 +21,7 @@ const LoginScreen = () => {
                 onPress={loginPressed}
                 loginButtonBackgroundColor="#000"
                 loginBackgorundColor="#fff"
-                loginText="Login"
+                loginText="Welcome to App"
                 loginButtonTextStyle={{ color: '#000' }}
                 onSwitchValueChange={switchValue => {
                     setSwitchValue(switchValue);
@@ -53,6 +53,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         //marginTop: 46,
         justifyContent: 'center',
-        textAlign: 'center'
+        textAlign: 'center',
     },
 });
