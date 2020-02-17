@@ -21,7 +21,8 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
     const [ paused, setPaused ] = useState(false);
     const [ fullscreen, setFullscreen ] = useState(false);
     const [ showControlPanel, setShowControlPanel ] = useState(false);
-    const [timing, setTiming] = useState(null);
+    //const [timing, setTiming] = useState(null);
+    let timing = null;
 
     useEffect(() => {
         Orientation.addOrientationListener(handleOrientation);
@@ -84,22 +85,22 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
     const handleFullscreen = (isSelected) => {
         setFullscreen(!isSelected);
         onFullscreen(isSelected);
-        restartTiming(timing);
+        restartTiming();
 
         fullscreen
             ? Orientation.lockToPortrait()
             : Orientation.lockToLandscape();
     };
 
-    const renderFullscreenControl = (size = 20) => {
+    const renderFullscreenControl = () => {
         const isSelected = fullscreen;
 
         return (
             <TouchableOpacity onPress={() => handleFullscreen(isSelected) }>
                 <Text style={styles.controlOptionRight}>
                     {!fullscreen
-                        ?<Icon name='ios-expand' size={size}/>
-                        :<Icon name='ios-contract' size={size}/>
+                        ?<Icon name='ios-expand' size={!fullscreen ? 20 : 30}/>
+                        :<Icon name='ios-contract' size={!fullscreen ? 20 : 30}/>
                     }
                 </Text>
             </TouchableOpacity>
@@ -118,13 +119,13 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
         )
     };
 
-    const renderPlayerAction = (size = 20) => {
+    const renderPlayerAction = () => {
         return (
-            <TouchableOpacity onPress={() => {setPaused(!paused); restartTiming(timing)}}>
+            <TouchableOpacity onPress={() => {setPaused(!paused); restartTiming()}}>
                 <Text style={styles.controlOptionLeft}>
                     {!paused
-                        ?<Icon name='ios-pause' size={size}/>
-                        :<Icon name='ios-play' size={size}/>
+                        ?<Icon name='ios-pause' size={!fullscreen ? 20 : 30}/>
+                        :<Icon name='ios-play' size={!fullscreen ? 20 : 30}/>
                     }
                 </Text>
             </TouchableOpacity>
@@ -133,14 +134,12 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
 
     const handleshowControlPanel = () => {
         setShowControlPanel(true)
-        const timing = setTimeout(() => {setShowControlPanel(false); setTiming(null)}, 5000);
-        setTiming(timing)
+        timing = setTimeout(() => {setShowControlPanel(false); timing = null}, 2000);
     };
 
-    const restartTiming = (timing = null) => {
+    const restartTiming = () => {
         clearTimeout(timing)
-        const newTiming = setTimeout(() => {setShowControlPanel(false); setTiming(null)}, 5000);
-        setTiming(newTiming)
+        timing = setTimeout(() => {setShowControlPanel(false); timing = null}, 2000);
     }
 
     return (
@@ -167,14 +166,14 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
             {showControlPanel &&
             <View style={styles.controlPanel}>
                 <View style={styles.mainPanel}>
-                    {!fullscreen ? renderPlayerAction(35) : renderPlayerAction(60)}
+                    {renderPlayerAction()}
                 </View>
                 <View style={styles.bottomPanel}>
                     <View style={styles.leftSide}>
-                        {!fullscreen ? renderPlayerAction() : renderPlayerAction(30)}
+                        {renderPlayerAction()}
                     </View>
                     <View style={styles.rightSide}>
-                        {!fullscreen ? renderFullscreenControl() : renderFullscreenControl(30)}
+                        {renderFullscreenControl()}
                     </View>
                 </View>
             </View>
