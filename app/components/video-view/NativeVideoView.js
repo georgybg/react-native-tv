@@ -21,8 +21,7 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
     const [ paused, setPaused ] = useState(false);
     const [ fullscreen, setFullscreen ] = useState(false);
     const [ showControlPanel, setShowControlPanel ] = useState(false);
-    //const [timing, setTiming] = useState(null);
-    let timing = null;
+    const [timing, setTiming] = useState(null);
 
     useEffect(() => {
         Orientation.addOrientationListener(handleOrientation);
@@ -85,7 +84,7 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
     const handleFullscreen = (isSelected) => {
         setFullscreen(!isSelected);
         onFullscreen(isSelected);
-        restartTiming();
+        restartTiming(paused);
 
         fullscreen
             ? Orientation.lockToPortrait()
@@ -93,7 +92,7 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
     };
 
     const renderFullscreenControl = () => {
-        const isSelected = fullscreen;
+        const isSelected = fullscreen
 
         return (
             <TouchableOpacity onPress={() => handleFullscreen(isSelected) }>
@@ -108,7 +107,7 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
     };
 
     const renderVolumeControl = (v) => {
-        const isSelected = (volume === v);
+        const isSelected = (volume === v)
 
         return (
             <TouchableOpacity onPress={() => { setVoulem(v) }}>
@@ -119,9 +118,14 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
         )
     };
 
+    const togglePlay = () => {
+        setPaused(!paused)
+        restartTiming(!paused)
+    }
+
     const renderPlayerAction = () => {
         return (
-            <TouchableOpacity onPress={() => {setPaused(!paused); restartTiming()}}>
+            <TouchableOpacity onPress={() => togglePlay()}>
                 <Text style={styles.controlOptionLeft}>
                     {!paused
                         ?<Icon name='ios-pause' size={!fullscreen ? 20 : 30}/>
@@ -134,17 +138,26 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
 
     const handleshowControlPanel = () => {
         setShowControlPanel(true)
-        timing = setTimeout(() => {setShowControlPanel(false); timing = null}, 2000);
+        restartTiming(paused)
     };
 
-    const restartTiming = () => {
+    const restartTiming = (paused = null) => {
+        console.log(paused)
         clearTimeout(timing)
-        timing = setTimeout(() => {setShowControlPanel(false); timing = null}, 2000);
+        if (paused) {
+            setTiming(null)
+
+            return
+        }
+
+        const pointer = setTimeout(() => {setShowControlPanel(false); setTiming(null)}, 3000)
+        setTiming(pointer)
     }
 
     return (
         <View style={fullscreen && styles.fullscreenVideoContainer}>
             <TouchableOpacity
+                activeOpacity={1}
                 onPress={() => handleshowControlPanel()}
             >
                 <Video
