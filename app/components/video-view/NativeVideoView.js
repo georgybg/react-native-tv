@@ -5,7 +5,9 @@ import {
     Text,
     TouchableOpacity,
     View,
-    Dimensions
+    Dimensions,
+    BackHandler,
+    Slider
 } from 'react-native';
 
 import Video from 'react-native-video';
@@ -15,7 +17,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 const NativeVideoView = ({ onFullscreen, ...props }) => {
 
     const [ rate, setRate ] = useState(1);
-    const [ volume, setVoulem ] = useState(1);
+    const [ volume, setVoulem ] = useState(0.5);
     const [ muted, setMuted ] = useState(false);
     const [ resizeMode, setResizeMode ] = useState('contain');
     const [ paused, setPaused ] = useState(false);
@@ -30,6 +32,24 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
             Orientation.removeOrientationListener(handleOrientation);
         };
     }, []);
+
+    useEffect(() => {
+        BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+        
+        return () => {
+            BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
+        }
+    }, [fullscreen])
+
+    const handleBackButtonClick = () => {        
+        if (fullscreen) {
+            handleFullscreen(fullscreen)
+
+            return true;
+        }
+        // вернуться назад
+        return true;
+    }
 
     const handleOrientation = (orientation) => {
         orientation === 'LANDSCAPE'
@@ -83,23 +103,20 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
 
     const handleFullscreen = (isSelected) => {
         setFullscreen(!isSelected);
-        onFullscreen(isSelected);
+        //onFullscreen(isSelected);
         restartTiming(paused);
-
-        fullscreen
+        isSelected
             ? Orientation.lockToPortrait()
             : Orientation.lockToLandscape();
     };
 
     const renderFullscreenControl = () => {
-        const isSelected = fullscreen
-
         return (
-            <TouchableOpacity onPress={() => handleFullscreen(isSelected) }>
+            <TouchableOpacity onPress={() => handleFullscreen(fullscreen) }>
                 <Text style={styles.controlOptionRight}>
-                    {!fullscreen
-                        ?<Icon name='ios-expand' size={!fullscreen ? 20 : 30}/>
-                        :<Icon name='ios-contract' size={!fullscreen ? 20 : 30}/>
+                    {fullscreen
+                        ?<Icon name='ios-contract' size={fullscreen ? 30 : 20}/>
+                        :<Icon name='ios-expand' size={fullscreen ? 30 : 20}/>
                     }
                 </Text>
             </TouchableOpacity>
@@ -123,16 +140,43 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
         restartTiming(!paused)
     }
 
-    const renderPlayerAction = () => {
+    const renderPlayerAction = (size = 1) => {
         return (
             <TouchableOpacity onPress={() => togglePlay()}>
                 <Text style={styles.controlOptionLeft}>
                     {!paused
-                        ?<Icon name='ios-pause' size={!fullscreen ? 20 : 30}/>
-                        :<Icon name='ios-play' size={!fullscreen ? 20 : 30}/>
+                        ?<Icon name='ios-pause' size={!fullscreen ? size*20 : size*30}/>
+                        :<Icon name='ios-play' size={!fullscreen ? size*20 : size*30}/>
                     }
                 </Text>
             </TouchableOpacity>
+        )
+    };
+    const handlerOnValueChange = (vol) => {
+        setVoulem(vol)
+        restartTiming()
+    }
+
+    const renderVolumeAction = () => {
+        return (
+            <View style={{...styles.controlOptionLeft, flexDirection: 'row'}}>
+                  <Text style={{...styles.controlOptionLeft, marginLeft: 10}}>
+                    {volume == 0 && <Icon name='ios-volume-off' size={fullscreen ? 30 : 20}/>}
+                    {volume > 0 && volume < 0.5 && <Icon name='ios-volume-mute' size={fullscreen ? 30 : 20}/>}
+                    {volume >= 0.5 && volume < 1 && <Icon name='ios-volume-low' size={fullscreen ? 30 : 20}/>}
+                    {volume == 1 && <Icon name='ios-volume-high' size={fullscreen ? 30 : 20}/>}
+                  </Text>
+                  <Slider
+                    style={fullscreen ? {width: 150, height: 30} : {width: 100, height: 20}}
+                    onValueChange={(vol) => handlerOnValueChange(vol)}
+                    value={volume}
+                    minimumValue={0}
+                    maximumValue={1}
+                    minimumTrackTintColor="#fff"
+                    maximumTrackTintColor="#fff"
+                    thumbTintColor="#fff"
+                />
+            </View>
         )
     };
 
@@ -142,7 +186,6 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
     };
 
     const restartTiming = (paused = null) => {
-        console.log(paused)
         clearTimeout(timing)
         if (paused) {
             setTiming(null)
@@ -179,11 +222,12 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
             {showControlPanel &&
             <View style={styles.controlPanel}>
                 <View style={styles.mainPanel}>
-                    {renderPlayerAction()}
+                    {renderPlayerAction(2)}
                 </View>
                 <View style={styles.bottomPanel}>
                     <View style={styles.leftSide}>
                         {renderPlayerAction()}
+                        {renderVolumeAction()}
                     </View>
                     <View style={styles.rightSide}>
                         {renderFullscreenControl()}
@@ -231,13 +275,15 @@ const styles = StyleSheet.create({
     },
     leftSide: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'flex-start'
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'center'
     },
     rightSide: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'flex-end'
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center'
 
     },
     controlOptionRight: {
