@@ -18,6 +18,7 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
 
     const [ rate, setRate ] = useState(1);
     const [ volume, setVoulem ] = useState(0.5);
+    const [ rememberVolume, setRememberVolume ] = useState(0.5);
     const [ muted, setMuted ] = useState(false);
     const [ resizeMode, setResizeMode ] = useState('contain');
     const [ paused, setPaused ] = useState(false);
@@ -48,7 +49,7 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
             return true;
         }
         // вернуться назад
-        return true;
+        //return true;
     }
 
     const handleOrientation = (orientation) => {
@@ -154,19 +155,26 @@ const NativeVideoView = ({ onFullscreen, ...props }) => {
     };
     const handlerOnValueChange = (vol) => {
         setVoulem(vol)
+        setRememberVolume(vol)
+        restartTiming()
+    }
+    const toggleVolume = () => {
+        volume ? setVoulem(0) : setVoulem(rememberVolume)
         restartTiming()
     }
 
     const renderVolumeAction = () => {
         return (
             <View style={{...styles.controlOptionLeft, flexDirection: 'row'}}>
-                  <Text style={{...styles.controlOptionLeft, marginLeft: 10}}>
-                    {volume == 0 && <Icon name='ios-volume-off' size={fullscreen ? 30 : 20}/>}
-                    {volume > 0 && volume < 0.5 && <Icon name='ios-volume-mute' size={fullscreen ? 30 : 20}/>}
-                    {volume >= 0.5 && volume < 1 && <Icon name='ios-volume-low' size={fullscreen ? 30 : 20}/>}
-                    {volume == 1 && <Icon name='ios-volume-high' size={fullscreen ? 30 : 20}/>}
-                  </Text>
-                  <Slider
+                <TouchableOpacity onPress={() => toggleVolume()}>
+                    <Text style={{...styles.controlOptionLeft, marginLeft: 10, width: fullscreen ? 40 : 30}}>
+                        {volume == 0 && <Icon name='ios-volume-off' size={fullscreen ? 30 : 20}/>}
+                        {volume > 0 && volume < 0.5 && <Icon name='ios-volume-mute' size={fullscreen ? 30 : 20}/>}
+                        {volume >= 0.5 && volume < 1 && <Icon name='ios-volume-low' size={fullscreen ? 30 : 20}/>}
+                        {volume == 1 && <Icon name='ios-volume-high' size={fullscreen ? 30 : 20}/>}
+                    </Text>
+                </TouchableOpacity>
+                <Slider
                     style={fullscreen ? {width: 150, height: 30} : {width: 100, height: 20}}
                     onValueChange={(vol) => handlerOnValueChange(vol)}
                     value={volume}
